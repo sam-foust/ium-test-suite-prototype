@@ -1,0 +1,35 @@
+title: IUM Test Suite
+description: Internal User Management Test Suite Documentation
+theme: minima
+baseurl: ""
+url: ""
+
+# Build settings
+markdown: kramdown
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+
+# Exclude files from processing
+exclude:
+  - .git
+  - .gitignore
+  - README.md
+
+# Collections configuration
+collections:
+  tests:
+    output: true
+    permalink: /:collection/:name
+
+# Defaults
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default
+  - scope:
+      path: "*.md"
+    values:
+      layout: page
+
