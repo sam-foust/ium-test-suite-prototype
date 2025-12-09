@@ -10,6 +10,7 @@ console.log('TEST_SUITES_PATH:', TEST_SUITES_PATH);
 interface ManifestEntry {
   id: string;
   file: string;
+  category?: string;
 }
 
 interface Manifest {
@@ -59,6 +60,7 @@ export const testSuiteApi = {
           feature: suite.metadata.feature,
           status: suite.metadata.status,
           lastUpdated: suite.metadata.lastUpdated,
+          category: entry.category,
         };
       })
     );

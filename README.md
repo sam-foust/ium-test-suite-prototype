@@ -194,9 +194,9 @@ npm run preview
 
 ## 📖 Documentation
 
-- [`DEPLOYMENT.md`](DEPLOYMENT.md) - Deployment guide
-- [`YAML_SCHEMA.md`](YAML_SCHEMA.md) - Test suite format
-- [`QUICK_START.md`](QUICK_START.md) - Getting started
+- [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) - Deployment guide
+- [`docs/YAML_SCHEMA.md`](docs/YAML_SCHEMA.md) - Test suite format
+- [`docs/QUICK_START.md`](docs/QUICK_START.md) - Getting started
 
 ---
 

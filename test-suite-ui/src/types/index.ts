@@ -4,6 +4,7 @@ export interface TestSuiteListItem {
   feature: string;
   status: string;
   lastUpdated: string;
+  category?: string;
 }
 
 export interface TestSuite {

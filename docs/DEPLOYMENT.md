@@ -72,11 +72,23 @@ metadata:
 # ... rest of the structure
 ```
 
-### Step 2: Add to Public Folder
+### Step 2: Add to Public Folder with Category
 
-Place the file in:
+Organize by category in subfolders:
+
 ```
-test-suite-ui/public/test-suites/example-test-suite.yaml
+test-suite-ui/public/test-suites/
+  ├── authn/              # Authentication tests
+  │   └── password-management.yaml
+  ├── payments/           # Payment tests
+  │   └── checkout-flow.yaml
+  ├── reporting/          # Reporting tests
+  └── ...
+```
+
+For example, place an authentication test in:
+```
+test-suite-ui/public/test-suites/authn/login-flow.yaml
 ```
 
 ### Step 3: Update Manifest
@@ -88,21 +100,30 @@ Edit `test-suite-ui/public/test-suites/manifest.json`:
   "testSuites": [
     {
       "id": "password-management",
-      "file": "password-management.yaml"
+      "file": "authn/password-management.yaml",
+      "category": "Authentication"
     },
     {
-      "id": "example-test-suite",
-      "file": "example-test-suite.yaml"
+      "id": "login-flow",
+      "file": "authn/login-flow.yaml",
+      "category": "Authentication"
+    },
+    {
+      "id": "checkout-flow",
+      "file": "payments/checkout-flow.yaml",
+      "category": "Payments"
     }
   ]
 }
 ```
 
+**Note:** The `file` path is relative to `test-suites/` folder, and `category` groups tests in the UI.
+
 ### Step 4: Commit and Push
 
 ```bash
 git add .
-git commit -m "Add new test suite: Example Test Suite"
+git commit -m "Add new test suite: Login Flow"
 git push origin main
 ```
 
