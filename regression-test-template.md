@@ -31,6 +31,7 @@ title: Password Management Regression Test Suite
 - Create or use a tenant with MFA disabled
 
 **User Accounts to Create:**
+
 | Prerequisite | Quantity | Notes |
 |---|---|---|
 | PRE-01 (Active Employee - Admin - MFA Disabled) | 2 | Create 2 employee accounts with admin role - use [Username1] + [AdminUsername] and [Password1] as variables (document actual values in Test Variables Tracker) |
@@ -89,6 +90,7 @@ Define the specific user states or data setups required. Complex setups are writ
 Use this section to document actual values used during test execution.
 
 ### PRE-01 Variables (Employee - Web):
+
 | Variable | Actual Value | Notes |
 |---|---|---|
 | [Username1] | | Employee #1 username |
@@ -104,6 +106,7 @@ Use this section to document actual values used during test execution.
 | [Password5] | | Password set in TC-04.4 |
 
 ### PRE-02 Variables (Technician - Mobile):
+
 | Variable | Actual Value | Notes |
 |---|---|---|
 | [Username2] | | Technician username |
@@ -184,4 +187,3 @@ Tests the tenant management impersonation feature where a temporary password is 
 - **Last Updated:** December 9, 2025
 - **Test Cycle:** Password Management Regression
 - **Status:** [x] Draft | [ ] Review | [ ] Approved | [ ] Executed
-
