@@ -28,14 +28,14 @@ const TestSuiteList = ({ testSuites }: TestSuiteListProps) => {
       
       {testSuites.length === 0 ? (
         <div className="empty-state">
-          <p>No test suites found. Add YAML files to the Assets/TestSuites folder.</p>
+          <p>No test suites found. Add YAML files to the test-suites folder.</p>
         </div>
       ) : (
         <div className="test-suite-cards">
           {testSuites.map((suite) => (
             <Link 
               key={suite.id} 
-              to={`/suite/${suite.id}`} 
+              to={`/?suite=${suite.id}`}
               className="test-suite-card"
             >
               <div className="card-header">

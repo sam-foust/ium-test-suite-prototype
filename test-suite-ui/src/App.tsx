@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
-import TestSuitePage from './pages/TestSuitePage';
 import './App.css';
 
 function App() {
@@ -19,8 +18,9 @@ function App() {
         <main className="app-main">
           <div className="container">
             <Routes>
+              {/* All routes go to HomePage, which handles query strings */}
               <Route path="/" element={<HomePage />} />
-              <Route path="/suite/:id" element={<TestSuitePage />} />
+              <Route path="*" element={<HomePage />} />
             </Routes>
           </div>
         </main>
