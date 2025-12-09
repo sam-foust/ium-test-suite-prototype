@@ -11,10 +11,12 @@ const HomePage = () => {
   useEffect(() => {
     const fetchTestSuites = async () => {
       try {
+        console.log('HomePage: Fetching test suites...');
         const data = await testSuiteApi.getAllTestSuites();
+        console.log('HomePage: Received test suites:', data);
         setTestSuites(data);
       } catch (err) {
-        setError('Failed to load test suites. Please ensure the API is running.');
+        setError('Failed to load test suites. Error: ' + (err instanceof Error ? err.message : String(err)));
         console.error('Error fetching test suites:', err);
       } finally {
         setLoading(false);

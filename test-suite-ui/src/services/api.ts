@@ -4,6 +4,9 @@ import type { TestSuite, TestSuiteListItem } from '../types';
 const BASE_PATH = import.meta.env.BASE_URL || '/';
 const TEST_SUITES_PATH = `${BASE_PATH}test-suites/`;
 
+console.log('BASE_PATH:', BASE_PATH);
+console.log('TEST_SUITES_PATH:', TEST_SUITES_PATH);
+
 interface ManifestEntry {
   id: string;
   file: string;
@@ -29,7 +32,10 @@ async function fetchYaml<T>(url: string): Promise<T> {
  * Fetch the manifest file listing all test suites
  */
 async function getManifest(): Promise<Manifest> {
-  const response = await fetch(`${TEST_SUITES_PATH}manifest.json`);
+  const url = `${TEST_SUITES_PATH}manifest.json`;
+  console.log('Fetching manifest from:', url);
+  const response = await fetch(url);
+  console.log('Manifest response:', response.status, response.statusText);
   if (!response.ok) {
     throw new Error(`Failed to fetch manifest: ${response.statusText}`);
   }

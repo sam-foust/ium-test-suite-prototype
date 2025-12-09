@@ -4,8 +4,11 @@ import TestSuitePage from './pages/TestSuitePage';
 import './App.css';
 
 function App() {
+  // Get base name from Vite's BASE_URL
+  const basename = import.meta.env.BASE_URL;
+  
   return (
-    <Router>
+    <Router basename={basename}>
       <div className="app">
         <header className="app-header">
           <div className="container">
