@@ -29,7 +29,11 @@ async function fetchYaml<T>(url: string): Promise<T> {
  * Fetch the manifest file listing all test suites
  */
 async function getManifest(): Promise<Manifest> {
-  return fetchYaml<Manifest>(`${TEST_SUITES_PATH}manifest.json`);
+  const response = await fetch(`${TEST_SUITES_PATH}manifest.json`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch manifest: ${response.statusText}`);
+  }
+  return response.json();
 }
 
 export const testSuiteApi = {
