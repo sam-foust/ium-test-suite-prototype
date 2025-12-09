@@ -1,0 +1,9 @@
+{
+  "testSuites": [
+    {
+      "id": "password-management",
+      "file": "password-management.yaml"
+    }
+  ]
+}
+
