@@ -21,7 +21,7 @@ const TestSuiteList = ({ testSuites }: TestSuiteListProps) => {
     }
   };
 
-  // Group test suites by category
+  // Group test features by category
   const groupedSuites = testSuites.reduce((acc, suite) => {
     const category = suite.category || 'Uncategorized';
     if (!acc[category]) {
@@ -35,12 +35,12 @@ const TestSuiteList = ({ testSuites }: TestSuiteListProps) => {
 
   return (
     <div className="test-suite-list">
-      <h1>Test Suite Library</h1>
-      <p className="subtitle">View and manage your manual test suites</p>
+      <h1>Test Feature Library</h1>
+      <p className="subtitle">View and manage your manual test features</p>
       
       {testSuites.length === 0 ? (
         <div className="empty-state">
-          <p>No test suites found. Add YAML files to the test-suites folder.</p>
+          <p>No test features found. Add .feature files to the test-suites folder.</p>
         </div>
       ) : (
         <>

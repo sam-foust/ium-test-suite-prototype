@@ -14,17 +14,17 @@ const HomePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch list of test suites
+  // Fetch list of test features
   useEffect(() => {
     const fetchTestSuites = async () => {
       try {
-        console.log('HomePage: Fetching test suites...');
+        console.log('HomePage: Fetching test features...');
         const data = await testSuiteApi.getAllTestSuites();
-        console.log('HomePage: Received test suites:', data);
+        console.log('HomePage: Received test features:', data);
         setTestSuites(data);
       } catch (err) {
-        setError('Failed to load test suites. Error: ' + (err instanceof Error ? err.message : String(err)));
-        console.error('Error fetching test suites:', err);
+        setError('Failed to load test features. Error: ' + (err instanceof Error ? err.message : String(err)));
+        console.error('Error fetching test features:', err);
       } finally {
         setLoading(false);
       }

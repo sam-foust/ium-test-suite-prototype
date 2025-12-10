@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { testSuiteApi } from '../services/api';
+import { exportFeatureToExcel } from '../utils/exportToGoogleSheets';
 import type { GherkinFeature, GherkinScenario, GherkinBackground, GherkinRule } from '../types';
 import './GherkinFeatureViewer.css';
 
@@ -143,6 +144,13 @@ const GherkinFeatureViewer: React.FC<GherkinFeatureViewerProps> = ({ suiteId, on
     </div>
   );
 
+  const handleExport = () => {
+    if (!feature) return;
+    
+    const url = window.location.href;
+    exportFeatureToExcel({ feature, url });
+  };
+
   const renderRule = (rule: GherkinRule) => (
     <div key={rule.id} className="rule-section">
       <div className="rule-header">
@@ -175,7 +183,7 @@ const GherkinFeatureViewer: React.FC<GherkinFeatureViewerProps> = ({ suiteId, on
     return (
       <div className="error-container">
         <div className="error-message">{error || 'Feature not found'}</div>
-        <button onClick={onBack} className="back-button">Back to Test Suites</button>
+        <button onClick={onBack} className="back-button">Back to Features</button>
       </div>
     );
   }
@@ -183,7 +191,12 @@ const GherkinFeatureViewer: React.FC<GherkinFeatureViewerProps> = ({ suiteId, on
   return (
     <div className="gherkin-feature-viewer">
       <div className="feature-header">
-        <button onClick={onBack} className="back-button">← Back to Test Suites</button>
+        <div className="header-actions">
+          <button onClick={onBack} className="back-button">← Back to Features</button>
+          <button onClick={handleExport} className="export-button">
+            📋 Export Test Record
+          </button>
+        </div>
         
         <div className="feature-tags">
           {feature.tags.map((tag, index) => (

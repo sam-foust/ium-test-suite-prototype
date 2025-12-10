@@ -11,7 +11,7 @@ function App() {
       <div className="app">
         <header className="app-header">
           <div className="container">
-            <h1 className="app-title">Test Suite Viewer</h1>
+            <h1 className="app-title">Test Feature Viewer</h1>
           </div>
         </header>
         
@@ -27,7 +27,7 @@ function App() {
         
         <footer className="app-footer">
           <div className="container">
-            <p>Test Suite Management System</p>
+            <p>Test Feature Management System</p>
           </div>
         </footer>
       </div>
