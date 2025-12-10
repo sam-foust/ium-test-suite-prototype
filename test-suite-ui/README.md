@@ -79,3 +79,4 @@ If not set, it defaults to `http://localhost:5000`.
 - **Axios**: HTTP client
 - **CSS**: Custom styling (no framework dependencies)
 
+

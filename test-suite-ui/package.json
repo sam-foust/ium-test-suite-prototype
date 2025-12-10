@@ -9,9 +9,8 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
-    "@types/js-yaml": "^4.0.9",
-    "axios": "^1.7.4",
-    "js-yaml": "^4.1.1",
+    "@cucumber/gherkin": "^37.0.0",
+    "@cucumber/messages": "^31.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.1"

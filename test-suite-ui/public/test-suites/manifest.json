@@ -2,14 +2,13 @@
   "testSuites": [
     {
       "id": "password-management",
-      "file": "authn/password-management.yaml",
+      "file": "authn/password-management.feature",
       "category": "Authentication"
     },
     {
       "id": "otp-delivery-flow",
-      "file": "authn/otp-delivery-flow.yaml",
+      "file": "authn/otp-delivery-flow.feature",
       "category": "Authentication"
     }
   ]
 }
-

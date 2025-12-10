@@ -1,6 +1,6 @@
 # Test Suite Viewer
 
-A modern, static web application for viewing manual test suites. Test suites are defined in YAML files and displayed in a beautiful React interface.
+A modern, static web application for viewing manual test suites. Test suites are defined in standard Gherkin (.feature) files and displayed in a beautiful React interface.
 
 **🌐 Live Demo:** [https://sam-foust.github.io/ium-test-suite-prototype/](https://sam-foust.github.io/ium-test-suite-prototype/)
 
@@ -9,11 +9,12 @@ A modern, static web application for viewing manual test suites. Test suites are
 ## ✨ Features
 
 - ✅ **Fully Static** - No backend needed, deploys to GitHub Pages for free
-- ✅ **YAML-Based** - Easy to edit test suites in version control
+- ✅ **Gherkin/BDD Format** - Industry-standard Given-When-Then syntax
 - ✅ **Auto-Deploy** - Push to main, site updates automatically via GitHub Actions
-- ✅ **Beautiful UI** - Professional, responsive React interface
+- ✅ **Beautiful UI** - Professional, responsive React interface with syntax highlighting
 - ✅ **Fast** - CDN-served, browser-cached, instant loads
 - ✅ **Type-Safe** - Full TypeScript support
+- ✅ **Automation-Ready** - Direct path to Cypress + Cucumber integration
 
 ---
 
@@ -37,31 +38,48 @@ Visit: [https://sam-foust.github.io/ium-test-suite-prototype/](https://sam-foust
 
 ## 📝 Adding New Test Suites
 
-### 1. Create YAML File
+### 1. Create Gherkin Feature File
 
-Create a test suite following the schema in [`YAML_SCHEMA.md`](YAML_SCHEMA.md):
+Create a `.feature` file using standard Gherkin syntax:
 
-```yaml
-metadata:
-  title: "My Test Suite"
-  feature: "Feature Name"
-  createdBy: "Your Name"
-  dateCreated: "2025-12-09"
-  status: "Draft"
+```gherkin
+@authentication @critical
+Feature: User Login
+  As a user
+  I want to log into the application
+  So that I can access my account
 
-testScenarios:
-  - id: "TC-01"
-    title: "Test Scenario"
-    testCases:
-      - testId: "TC-01.1"
-        title: "Test Case"
-        actionSteps: ["Step 1"]
-        expectedResult: ["Result 1"]
+  Background:
+    Given the application is running
+    And the database is accessible
+
+  @smoke-test
+  Scenario: Successful login with valid credentials
+    Given I am on the login page
+    When I enter username "john.doe"
+    And I enter password "SecurePass123"
+    And I click the "Login" button
+    Then I should be redirected to the dashboard
+    And I should see a welcome message
+
+  @error-handling
+  Scenario: Failed login with invalid password
+    Given I am on the login page
+    When I enter username "john.doe"
+    And I enter an incorrect password
+    And I click the "Login" button
+    Then I should see an error message "Invalid credentials"
+    And I should remain on the login page
 ```
 
 ### 2. Add to Public Folder
 
-Place file in: `test-suite-ui/public/test-suites/my-test-suite.yaml`
+Place file in a category subfolder:
+```
+test-suite-ui/public/test-suites/{category}/my-test.feature
+```
+
+Example: `test-suite-ui/public/test-suites/authn/login-flow.feature`
 
 ### 3. Update Manifest
 
@@ -72,11 +90,13 @@ Edit [`test-suite-ui/public/test-suites/manifest.json`](test-suite-ui/public/tes
   "testSuites": [
     {
       "id": "password-management",
-      "file": "password-management.yaml"
+      "file": "authn/password-management.feature",
+      "category": "Authentication"
     },
     {
-      "id": "my-test-suite",
-      "file": "my-test-suite.yaml"
+      "id": "login-flow",
+      "file": "authn/login-flow.feature",
+      "category": "Authentication"
     }
   ]
 }
@@ -86,7 +106,7 @@ Edit [`test-suite-ui/public/test-suites/manifest.json`](test-suite-ui/public/tes
 
 ```bash
 git add .
-git commit -m "Add My Test Suite"
+git commit -m "Add Login Flow Test Suite"
 git push origin main
 ```
 
@@ -102,11 +122,14 @@ ium-test-suite-prototype/
 │   ├── public/
 │   │   └── test-suites/
 │   │       ├── manifest.json         # Lists all test suites
-│   │       └── *.yaml                # Test suite files
+│   │       └── authn/                # Category folders
+│   │           ├── *.feature         # Gherkin test suite files
+│   │           └── ...
 │   ├── src/
 │   │   ├── components/               # React components
+│   │   │   └── GherkinFeatureViewer.tsx  # Gherkin display
 │   │   ├── services/
-│   │   │   └── api.ts               # Fetches & parses YAML
+│   │   │   └── api.ts               # Fetches & parses Gherkin
 │   │   └── types/                   # TypeScript types
 │   └── dist/                        # Built files (GitHub Pages serves this)
 │
@@ -114,8 +137,10 @@ ium-test-suite-prototype/
 │   └── deploy.yml                   # Auto-deployment workflow
 │
 ├── archived/                         # Old backend (not used)
-├── DEPLOYMENT.md                    # Deployment guide
-└── YAML_SCHEMA.md                   # Test suite format
+└── docs/                            # Documentation
+    ├── AI_AGENT_GUIDE.md            # Comprehensive guide for creating tests
+    ├── DEPLOYMENT.md                # Deployment guide
+    └── QUICK_START.md               # Getting started
 ```
 
 ---
@@ -129,11 +154,11 @@ React App Loads from GitHub Pages CDN
     ↓
 Fetch manifest.json (list of test suites)
     ↓
-Fetch test-suite.yaml files
+Fetch .feature files (Gherkin)
     ↓
-Parse YAML with js-yaml in browser
+Parse Gherkin with @cucumber/gherkin in browser
     ↓
-Render Beautiful UI
+Render Beautiful UI with Syntax Highlighting
 ```
 
 **No backend, no API, all static!**
@@ -175,7 +200,8 @@ npm run preview
 - **TypeScript** - Type safety
 - **Vite** - Build tool
 - **React Router** - Navigation
-- **js-yaml** - YAML parsing
+- **@cucumber/gherkin** - Gherkin parsing
+- **@cucumber/messages** - Gherkin types
 - **GitHub Pages** - Free hosting
 - **GitHub Actions** - Auto-deployment
 
@@ -183,20 +209,52 @@ npm run preview
 
 ## 🎨 UI Features
 
-- Card-based test suite list with status badges
-- Comprehensive detail views
+- Card-based test suite list with tags
+- Collapsible scenarios with syntax highlighting
+- Given (blue), When (green), Then (orange) keyword colors
+- Background section highlighting
+- Examples tables for data-driven tests
 - Responsive design (desktop & mobile)
-- Clean tables for test cases
-- Status badges (Draft, Review, Approved, Executed)
-- Easy navigation with React Router
+- Status tags from feature tags
+- Easy navigation with query string routing
+
+---
+
+## 📚 Gherkin Syntax
+
+### Keywords
+
+- **Feature**: High-level description of a software feature
+- **Background**: Steps that run before each scenario (can be at Feature or Rule level)
+- **Rule**: Groups related scenarios under a business rule
+- **Scenario**: Concrete example of business rule
+- **Given**: Preconditions (blue)
+- **When**: Actions (green)
+- **Then**: Expected outcomes (orange)
+- **And/But**: Additional steps (gray)
+
+### Tags
+
+Use tags to organize and categorize:
+
+```gherkin
+@authentication @critical @smoke-test
+Feature: User Login
+```
+
+### Comments
+
+```gherkin
+# This is a comment
+# Setup notes: Ensure email service is configured
+```
 
 ---
 
 ## 📖 Documentation
 
-- [`docs/AI_AGENT_GUIDE.md`](docs/AI_AGENT_GUIDE.md) - **Comprehensive guide for AI agents** - How to create and extend test suites
+- [`docs/AI_AGENT_GUIDE.md`](docs/AI_AGENT_GUIDE.md) - **Comprehensive guide for AI agents** - How to create and extend test suites using Gherkin
 - [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) - Deployment guide
-- [`docs/YAML_SCHEMA.md`](docs/YAML_SCHEMA.md) - Test suite format reference
 - [`docs/QUICK_START.md`](docs/QUICK_START.md) - Getting started
 
 ---
@@ -214,9 +272,11 @@ npm run preview
 
 Perfect for:
 - ✅ Manual test documentation
-- ✅ QA team test case management
+- ✅ BDD/Gherkin test case management
 - ✅ Regression test suites
 - ✅ Test execution guides
+- ✅ Living documentation
+- ✅ Future Cypress/Cucumber automation
 
 ---
 
@@ -230,19 +290,33 @@ Perfect for:
 
 ---
 
-## 📈 Example
+## 📈 Examples
 
-See [`password-management.yaml`](test-suite-ui/public/test-suites/password-management.yaml) for a complete example.
+See the following for complete examples:
+- [`test-suite-ui/public/test-suites/authn/password-management.feature`](test-suite-ui/public/test-suites/authn/password-management.feature)
+- [`test-suite-ui/public/test-suites/authn/otp-delivery-flow.feature`](test-suite-ui/public/test-suites/authn/otp-delivery-flow.feature)
 
 ---
 
 ## 🤝 Contributing
 
-1. Create YAML test suite
-2. Place in `test-suite-ui/public/test-suites/`
+1. Create Gherkin `.feature` file
+2. Place in appropriate category folder in `test-suite-ui/public/test-suites/`
 3. Update `manifest.json`
 4. Push to main - auto-deploys!
 
 ---
 
-Built with ❤️ for better manual testing workflows
+## 🔄 Future Automation
+
+This format is automation-ready! When you're ready to automate:
+
+1. Install Cypress + Cucumber
+2. Write step definitions that match your Gherkin steps
+3. Run tests: `npx cypress run`
+
+Your Gherkin files serve as both documentation and executable tests!
+
+---
+
+Built with ❤️ for better manual testing workflows and BDD practices

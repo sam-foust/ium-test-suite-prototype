@@ -1,151 +1,223 @@
-# AI Agent Guide: Test Suite YAML Format and Usage
+# AI Agent Guide: Gherkin Test Suite Format
 
 ## Overview
 
-This guide provides detailed instructions for AI agents working with the Test Suite Viewer application. It covers the YAML schema, how to create new test suites, how to extend existing ones, and the relationship between YAML structure and HTML rendering.
+This guide provides detailed instructions for AI agents working with the Test Suite Viewer application. The application uses standard Gherkin (`.feature` files) format for defining test scenarios in a human-readable, automation-ready way.
 
 ## Table of Contents
 
-1. [YAML Schema Reference](#yaml-schema-reference)
+1. [Gherkin Syntax Reference](#gherkin-syntax-reference)
 2. [Creating New Test Suites](#creating-new-test-suites)
 3. [Extending Existing Test Suites](#extending-existing-test-suites)
 4. [File Organization](#file-organization)
 5. [Manifest Configuration](#manifest-configuration)
-6. [YAML to HTML Mapping](#yaml-to-html-mapping)
-7. [Common Patterns and Examples](#common-patterns-and-examples)
-8. [Best Practices](#best-practices)
+6. [Common Patterns and Examples](#common-patterns-and-examples)
+7. [Best Practices](#best-practices)
+8. [Automation Path](#automation-path)
 
 ---
 
-## YAML Schema Reference
+## Gherkin Syntax Reference
 
-### Complete Schema Structure
+### Core Structure
 
-```yaml
-metadata:
-  title: string                    # Display title of the test suite
-  feature: string                  # Feature name being tested
-  createdBy: string                # Author name
-  dateCreated: string              # ISO date format: YYYY-MM-DD
-  lastUpdated: string              # ISO date format: YYYY-MM-DD
-  status: string                   # One of: Draft, Review, Approved, Executed
+```gherkin
+@tag1 @tag2 @tag3
+Feature: Feature Name
+  Brief description of the feature being tested
+  Can span multiple lines
 
-featureInformation:
-  feature: string                  # Full feature description
-  details: string[]                # Array of specific details/edge cases
+  Background:
+    Given precondition that applies to all scenarios
+    And another precondition
 
-preSetup:
-  purpose: string                  # Purpose of pre-setup section
-  tenantSetup: string[]            # Array of tenant setup requirements
-  userAccounts:                    # Array of user account definitions
-    - prerequisite: string         # Prerequisite identifier (e.g., "PRE-01")
-      quantity: number              # Number of accounts to create
-      notes: string                # Additional notes
-  checklistItems: string[]         # Array of setup completion checklist items
+  Rule: Business Rule Name
+    Description of the business rule being tested
+    This groups related scenarios together
 
-executionMatrix:
-  important: string                # Important note about execution
-  matrix:                          # Array of execution matrix rows
-    - userType: string             # User type description
-      platform: string             # Platform (e.g., "Web Browser", "Mobile")
-      variableSet: string           # Variables used for this execution
-      executionStatus: string       # Status (e.g., "Incomplete", "Complete")
-  instructions: string[]           # Array of testing instructions
-  executionFlow: string[]           # Array of execution flow steps
+    Background:
+      Given rule-specific precondition
+      And another rule precondition
 
-prerequisites:                     # Array of prerequisite definitions
-  - id: string                     # Prerequisite ID (e.g., "PRE-01")
-    dataObject: string             # Description of the data object
-    steps: string[]                # Array of steps to create this prerequisite
+    @scenario-tag
+    Scenario: Scenario Name
+      Given initial context
+      When action is performed
+      Then expected outcome
 
-testVariables:                     # Array of variable categories
-  - category: string               # Category name (e.g., "PRE-01 Variables")
-    variables:                     # Array of variables in this category
-      - name: string               # Variable name (e.g., "[Username1]")
-        actualValue: string        # Actual value (empty initially)
-        notes: string              # Notes about the variable
+  @another-tag
+  Scenario Outline: Parameterized Scenario
+    Given I have "<parameter>"
+    When I do something with "<parameter>"
+    Then I expect "<result>"
 
-testScenarios:                     # Array of test scenarios
-  - id: string                     # Scenario ID (e.g., "TC-01")
-    title: string                  # Scenario title
-    description: string            # Scenario description
-    testCases:                     # Array of test cases
-      - testId: string             # Test case ID (e.g., "TC-01.1")
-        title: string              # Test case title
-        prerequisiteReference: string  # Reference to prerequisite
-        actionSteps: string[]      # Array of action steps
-        expectedResult: string[]   # Array of expected results
-        notes: string              # Optional notes
+    Examples:
+      | parameter | result  |
+      | value1    | result1 |
+      | value2    | result2 |
 ```
 
-### Field Descriptions
+### Keywords
 
-#### metadata
-- **title**: Main heading displayed in the UI. Should be descriptive and clear.
-- **feature**: Short feature name used in cards and summaries.
-- **createdBy**: Author name for attribution.
-- **dateCreated**: ISO date (YYYY-MM-DD) when suite was created.
-- **lastUpdated**: ISO date (YYYY-MM-DD) of last modification.
-- **status**: Current status - affects badge color in UI:
-  - `Draft` - Gray badge
-  - `Review` - Yellow badge
-  - `Approved` - Green badge
-  - `Executed` - Blue badge
+#### Feature
+- **Purpose**: Describes the feature being tested
+- **Format**: `Feature: Feature Name`
+- **Description**: Multiple lines of text after the feature name
+- **Tags**: Optional tags before Feature keyword
 
-#### featureInformation
-- **feature**: Full description of what's being tested.
-- **details**: Bullet points describing specific test coverage areas.
+```gherkin
+@authentication @critical
+Feature: User Login
+  This feature allows users to log into the application
+  using their username and password credentials.
+```
 
-#### preSetup
-- **purpose**: Explanation of why pre-setup is needed.
-- **tenantSetup**: List of tenant-level configurations required.
-- **userAccounts**: Defines test users needed:
-  - `prerequisite`: Links to a prerequisite ID (e.g., "PRE-01")
-  - `quantity`: How many of this type to create
-  - `notes`: Additional context
-- **checklistItems**: Step-by-step checklist for setup completion.
+#### Background
+- **Purpose**: Steps that run before each scenario
+- **When to use**: Common setup that applies to all scenarios in the feature (or rule)
+- **Runs**: Before each scenario
+- **Scope**: Can be at Feature level (applies to all) or Rule level (applies to scenarios in that rule)
 
-#### executionMatrix
-- **important**: Highlighted note displayed prominently.
-- **matrix**: Table rows showing different execution combinations:
-  - Each row represents a test execution path
-  - `executionStatus` can be "Incomplete", "Complete", etc.
-- **instructions**: Numbered list of how to execute tests.
-- **executionFlow**: Ordered list of execution passes.
+```gherkin
+# Feature-level background (applies to all scenarios and rules)
+Background:
+  Given the application is running
+  And the database is accessible
 
-#### prerequisites
-- **id**: Unique identifier (format: PRE-XX)
-- **dataObject**: What this prerequisite represents.
-- **steps**: Ordered list of steps to create this prerequisite.
+Rule: User Management
+  # Rule-level background (only applies to scenarios in this rule)
+  Background:
+    Given I have an active user account
+    And the user has permissions
+```
 
-#### testVariables
-- **category**: Groups related variables together.
-- **variables**: List of variables:
-  - `name`: Variable placeholder (e.g., "[Username1]")
-  - `actualValue`: Filled in during testing (empty in template)
-  - `notes`: Explanation of variable usage
+#### Rule
+- **Purpose**: Group related scenarios under a business rule
+- **Format**: `Rule: Rule Name`
+- **Benefits**: Organizes scenarios, allows rule-specific backgrounds
+- **When to use**: When you have multiple related scenarios testing the same business rule
 
-#### testScenarios
-- **id**: Unique scenario ID (format: TC-XX)
-- **title**: Scenario name
-- **description**: What this scenario tests
-- **testCases**: Individual test cases:
-  - `testId`: Unique test case ID (format: TC-XX.Y)
-  - `title`: Test case name
-  - `prerequisiteReference`: Which prerequisite this uses
-  - `actionSteps`: Ordered list of steps to execute
-  - `expectedResult`: List of expected outcomes
-  - `notes`: Optional additional information
+```gherkin
+Feature: Password Management
+
+  Background:
+    Given the system is configured
+
+  Rule: Employee Password Flows
+    User-initiated password changes
+
+    Background:
+      Given I have an employee account
+
+    Scenario: Change password
+      # ... steps ...
+
+    Scenario: Forgot password
+      # ... steps ...
+
+  Rule: Admin Password Management
+    Admin-controlled password operations
+
+    Background:
+      Given I have an admin account
+
+    Scenario: Admin resets user password
+      # ... steps ...
+```
+
+#### Scenario
+- **Purpose**: A single test case
+- **Format**: `Scenario: Scenario Name`
+- **Steps**: Given, When, Then, And, But
+
+```gherkin
+Scenario: Successful login
+  Given I am on the login page
+  When I enter valid credentials
+  Then I should be redirected to the dashboard
+```
+
+#### Scenario Outline
+- **Purpose**: Data-driven testing
+- **Format**: `Scenario Outline:` with `Examples:` table
+- **Use**: Test same flow with different data
+
+```gherkin
+Scenario Outline: Login with different users
+  Given I am user "<username>"
+  When I login with password "<password>"
+  Then I should see "<message>"
+
+  Examples:
+    | username | password | message |
+    | john     | pass123  | Welcome |
+    | jane     | pass456  | Welcome |
+```
+
+#### Step Keywords
+
+**Given** - Preconditions (blue in UI)
+```gherkin
+Given I am on the login page
+Given I have a user account
+Given the feature is enabled
+```
+
+**When** - Actions (green in UI)
+```gherkin
+When I enter my username
+When I click the "Submit" button
+When I navigate to the dashboard
+```
+
+**Then** - Expected outcomes (orange in UI)
+```gherkin
+Then I should see a success message
+Then the user is logged in
+Then the page displays correctly
+```
+
+**And/But** - Additional steps (gray in UI)
+```gherkin
+And I enter my password
+And I check the "Remember me" box
+But I should not see admin options
+```
+
+### Tags
+
+Tags categorize and filter scenarios:
+
+```gherkin
+@authentication   # Feature category
+@critical         # Priority level
+@smoke-test       # Test type
+@web-only         # Platform
+@regression       # Test suite
+```
+
+**Common tag patterns:**
+- `@{feature}` - Feature category (authentication, payments, etc.)
+- `@{priority}` - critical, high, medium, low
+- `@{type}` - smoke-test, regression, integration
+- `@{platform}` - web, mobile, api
+- `@{status}` - draft, active, deprecated
+
+### Comments
+
+```gherkin
+# This is a comment
+# Setup notes: Requires email service configured
+# Known issue: Edge case with special characters
+```
 
 ---
 
 ## Creating New Test Suites
 
-### Step-by-Step Process
+### Step 1: Choose a Category
 
-#### 1. Choose a Category Folder
-
-Test suites are organized by category in subfolders:
+Organize test suites into category folders:
 
 ```
 test-suite-ui/public/test-suites/
@@ -156,104 +228,60 @@ test-suite-ui/public/test-suites/
 └── ...
 ```
 
-**Decision Tree:**
+**Decision guide:**
 - Authentication, login, password → `authn/`
 - Payment, billing, checkout → `payments/`
 - Reports, dashboards, exports → `reporting/`
 - API integrations, webhooks → `integrations/`
-- Other → Create new folder or use root
 
-#### 2. Create the YAML File
+### Step 2: Create the Feature File
 
-**Naming Convention:**
-- Use kebab-case: `login-flow.yaml`, `checkout-process.yaml`
+**Naming convention:**
+- Use kebab-case: `login-flow.feature`, `checkout-process.feature`
 - Be descriptive but concise
 - Match the main feature being tested
 
-**File Location:**
+**File location:**
 ```
-test-suite-ui/public/test-suites/{category}/{suite-name}.yaml
-```
-
-#### 3. Write the YAML Structure
-
-**Start with this template:**
-
-```yaml
-metadata:
-  title: "Your Test Suite Title"
-  feature: "Feature Name"
-  createdBy: "Your Name"
-  dateCreated: "2025-12-09"
-  lastUpdated: "2025-12-09"
-  status: "Draft"
-
-featureInformation:
-  feature: "Full description of what this test suite covers"
-  details:
-    - "Specific detail or edge case 1"
-    - "Specific detail or edge case 2"
-    - "Platform coverage: Web, Mobile, API"
-
-preSetup:
-  purpose: "Why setup is needed before testing"
-  tenantSetup:
-    - "Tenant configuration requirement 1"
-    - "Tenant configuration requirement 2"
-  userAccounts:
-    - prerequisite: "PRE-01"
-      quantity: 1
-      notes: "Description of what this user is for"
-  checklistItems:
-    - "Setup item 1"
-    - "Setup item 2"
-
-executionMatrix:
-  important: "Any important notes about execution"
-  matrix:
-    - userType: "User Type Name"
-      platform: "Platform Name"
-      variableSet: "Variables used"
-      executionStatus: "Incomplete"
-  instructions:
-    - "Instruction step 1"
-    - "Instruction step 2"
-  executionFlow:
-    - "Flow step 1"
-    - "Flow step 2"
-
-prerequisites:
-  - id: "PRE-01"
-    dataObject: "Description of prerequisite"
-    steps:
-      - "Step 1 to create"
-      - "Step 2 to create"
-
-testVariables:
-  - category: "Category Name Variables"
-    variables:
-      - name: "[VariableName]"
-        actualValue: ""
-        notes: "What this variable represents"
-
-testScenarios:
-  - id: "TC-01"
-    title: "Test Scenario Title"
-    description: "What this scenario tests"
-    testCases:
-      - testId: "TC-01.1"
-        title: "Test Case Title"
-        prerequisiteReference: "Uses PRE-01"
-        actionSteps:
-          - "Action step 1"
-          - "Action step 2"
-        expectedResult:
-          - "Expected result 1"
-          - "Expected result 2"
-        notes: ""
+test-suite-ui/public/test-suites/{category}/{feature-name}.feature
 ```
 
-#### 4. Update the Manifest
+### Step 3: Write the Gherkin
+
+**Basic template:**
+
+```gherkin
+@category @priority
+Feature: Feature Name
+  Description of what this feature does
+  and why it's important to test
+
+  Background:
+    Given common precondition 1
+    And common precondition 2
+
+  @tag1
+  Scenario: First scenario name
+    Given initial context
+    And more context if needed
+    When user performs action
+    And another action
+    Then expected outcome
+    And additional verification
+
+  @tag2
+  Scenario: Second scenario name
+    Given different context
+    When different action
+    Then different outcome
+
+  # Setup notes:
+  # - List any required setup
+  # - Document prerequisites
+  # - Note any dependencies
+```
+
+### Step 4: Update Manifest
 
 Edit `test-suite-ui/public/test-suites/manifest.json`:
 
@@ -261,119 +289,90 @@ Edit `test-suite-ui/public/test-suites/manifest.json`:
 {
   "testSuites": [
     {
-      "id": "password-management",
-      "file": "authn/password-management.yaml",
+      "id": "login-flow",
+      "file": "authn/login-flow.feature",
       "category": "Authentication"
-    },
-    {
-      "id": "your-new-suite",
-      "file": "category/your-new-suite.yaml",
-      "category": "Category Name"
     }
   ]
 }
 ```
 
 **Fields:**
-- `id`: Unique identifier (kebab-case, matches filename without extension)
+- `id`: Unique identifier (matches filename without .feature)
 - `file`: Path relative to `test-suites/` folder
 - `category`: Display name for grouping in UI
 
-#### 5. Validate the YAML
+### Step 5: Test Locally
 
-**Check for:**
-- Valid YAML syntax (proper indentation, no tabs)
-- All required fields present
-- IDs are unique within the file
-- Prerequisite references match actual prerequisite IDs
-- Date format is YYYY-MM-DD
+```bash
+cd test-suite-ui
+npm run dev
+```
 
-**Common Errors:**
-- Tabs instead of spaces (YAML requires spaces)
-- Missing colons after keys
-- Incorrect array syntax
-- Unclosed quotes
+Open `http://localhost:5173` and verify your test suite appears and renders correctly.
 
 ---
 
 ## Extending Existing Test Suites
 
-### Adding New Test Scenarios
+### Adding New Scenarios
 
-To add a new scenario to an existing suite:
+Add scenarios to the existing feature file:
 
-1. **Add to testScenarios array:**
+```gherkin
+Feature: Existing Feature
+  # ... existing scenarios ...
 
-```yaml
-testScenarios:
-  - id: "TC-01"
-    # ... existing scenario
-  - id: "TC-02"              # New scenario
-    title: "New Scenario Title"
-    description: "What this new scenario tests"
-    testCases:
-      - testId: "TC-02.1"
-        title: "First test case"
-        # ... rest of test case
+  @new-scenario
+  Scenario: New scenario to add
+    Given new context
+    When new action
+    Then new outcome
 ```
 
-2. **Update lastUpdated in metadata:**
+### Adding Scenario Outlines
 
-```yaml
-metadata:
-  lastUpdated: "2025-12-10"  # Update to today's date
+For data-driven testing:
+
+```gherkin
+@data-driven
+Scenario Outline: Test with multiple inputs
+  Given I have input "<input>"
+  When I process it
+  Then I get "<output>"
+
+  Examples:
+    | input | output |
+    | test1 | result1 |
+    | test2 | result2 |
 ```
 
-### Adding New Test Cases to Existing Scenario
+### Updating Background
 
-```yaml
-testScenarios:
-  - id: "TC-01"
-    testCases:
-      - testId: "TC-01.1"
-        # ... existing test case
-      - testId: "TC-01.2"     # New test case
-        title: "New Test Case"
-        prerequisiteReference: "Continues from TC-01.1"
-        # ... rest of test case
+Modify shared setup steps:
+
+```gherkin
+Background:
+  Given existing precondition
+  And new precondition that applies to all scenarios
 ```
 
-### Adding New Prerequisites
+### Adding Setup Comments
 
-```yaml
-prerequisites:
-  - id: "PRE-01"
-    # ... existing prerequisite
-  - id: "PRE-02"              # New prerequisite
-    dataObject: "New prerequisite description"
-    steps:
-      - "Step 1"
-      - "Step 2"
-```
+Document complex setups:
 
-### Adding New Variables
+```gherkin
+Feature: Complex Feature
+  # ... feature description ...
 
-```yaml
-testVariables:
-  - category: "Existing Category"
-    variables:
-      - name: "[ExistingVar]"
-        # ... existing variable
-      - name: "[NewVar]"      # New variable
-        actualValue: ""
-        notes: "What this variable is for"
-```
+  # Setup Requirements:
+  # - Tenant must have feature flag enabled
+  # - Email service must be configured
+  # - At least 2 test user accounts needed
+  # - Database must contain test data
 
-### Adding New User Accounts
-
-```yaml
-preSetup:
-  userAccounts:
-    - prerequisite: "PRE-01"
-      # ... existing account
-    - prerequisite: "PRE-02"   # New account type
-      quantity: 2
-      notes: "Description of new account type"
+  Background:
+    # ... steps ...
 ```
 
 ---
@@ -384,54 +383,52 @@ preSetup:
 
 ```
 test-suite-ui/public/test-suites/
-├── manifest.json                    # Master list of all suites
-├── authn/                           # Authentication category
-│   ├── password-management.yaml
-│   ├── login-flow.yaml
-│   └── mfa-setup.yaml
-├── payments/                        # Payments category
-│   ├── checkout-process.yaml
-│   └── refund-flow.yaml
-└── reporting/                       # Reporting category
-    └── export-reports.yaml
+├── manifest.json                     # Master list
+├── authn/                            # Authentication
+│   ├── password-management.feature
+│   ├── login-flow.feature
+│   └── otp-delivery-flow.feature
+├── payments/                         # Payments
+│   ├── checkout-process.feature
+│   └── refund-flow.feature
+└── reporting/                        # Reporting
+    └── export-reports.feature
 ```
 
 ### Naming Conventions
 
 **Folders (Categories):**
-- Use lowercase, short names: `authn`, `payments`, `reporting`
+- Lowercase, short names: `authn`, `payments`, `reporting`
 - Be consistent across the project
-- Use plural for categories with multiple suites
+- Use singular or plural consistently
 
 **Files:**
-- Use kebab-case: `password-management.yaml`
-- Be descriptive: `checkout-process.yaml` not `checkout.yaml`
-- Match the main feature being tested
+- Use kebab-case: `password-management.feature`
+- Be descriptive: `checkout-process.feature` not `checkout.feature`
+- Extension must be `.feature`
 
-**IDs:**
-- Test Suite ID: Matches filename (without extension)
-- Prerequisite IDs: `PRE-01`, `PRE-02`, etc.
-- Scenario IDs: `TC-01`, `TC-02`, etc.
-- Test Case IDs: `TC-01.1`, `TC-01.2`, etc.
+**IDs in manifest:**
+- Must match filename (without `.feature` extension)
+- Use kebab-case: `password-management`
 
 ---
 
 ## Manifest Configuration
 
-### Manifest File Location
+### Location
 
 ```
 test-suite-ui/public/test-suites/manifest.json
 ```
 
-### Manifest Structure
+### Structure
 
 ```json
 {
   "testSuites": [
     {
       "id": "unique-suite-id",
-      "file": "category/filename.yaml",
+      "file": "category/filename.feature",
       "category": "Display Category Name"
     }
   ]
@@ -440,29 +437,22 @@ test-suite-ui/public/test-suites/manifest.json
 
 ### Adding Entries
 
-**Required Fields:**
-- `id`: Must be unique across all suites
-- `file`: Relative path from `test-suites/` folder
-- `category`: Display name (can be same for multiple suites)
-
-**Example:**
-
 ```json
 {
   "testSuites": [
     {
       "id": "password-management",
-      "file": "authn/password-management.yaml",
+      "file": "authn/password-management.feature",
       "category": "Authentication"
     },
     {
-      "id": "login-flow",
-      "file": "authn/login-flow.yaml",
+      "id": "otp-delivery-flow",
+      "file": "authn/otp-delivery-flow.feature",
       "category": "Authentication"
     },
     {
       "id": "checkout-process",
-      "file": "payments/checkout-process.yaml",
+      "file": "payments/checkout-process.feature",
       "category": "Payments"
     }
   ]
@@ -470,126 +460,10 @@ test-suite-ui/public/test-suites/manifest.json
 ```
 
 **Important:**
-- Keep entries sorted by category for easier maintenance
+- Keep entries sorted by category
 - Ensure `file` path matches actual file location
 - `id` should match filename (without extension)
-
----
-
-## YAML to HTML Mapping
-
-Understanding how YAML fields render in the UI helps when creating test suites.
-
-### Metadata Section
-
-```yaml
-metadata:
-  title: "Password Management"
-```
-
-**Renders as:**
-- Main page heading (h1)
-- Card title in list view
-- Page title in browser tab
-
-### Feature Information
-
-```yaml
-featureInformation:
-  feature: "Full description"
-  details: ["Detail 1", "Detail 2"]
-```
-
-**Renders as:**
-- Feature description paragraph
-- Bulleted list of details
-
-### Pre-Setup Section
-
-```yaml
-preSetup:
-  purpose: "Setup purpose"
-  tenantSetup: ["Item 1"]
-  userAccounts: [...]
-  checklistItems: ["Item 1"]
-```
-
-**Renders as:**
-- Purpose paragraph
-- Tenant setup bulleted list
-- User accounts table (Prerequisite | Quantity | Notes)
-- Checklist with checkboxes
-
-### Execution Matrix
-
-```yaml
-executionMatrix:
-  matrix:
-    - userType: "Employee"
-      platform: "Web"
-      variableSet: "[Var1], [Var2]"
-      executionStatus: "Incomplete"
-```
-
-**Renders as:**
-- Important note (highlighted box)
-- Matrix table (User Type | Platform | Variable Set | Status)
-- Instructions numbered list
-- Execution flow numbered list
-
-### Prerequisites
-
-```yaml
-prerequisites:
-  - id: "PRE-01"
-    dataObject: "Description"
-    steps: ["Step 1", "Step 2"]
-```
-
-**Renders as:**
-- Table (ID | Data Object | Steps)
-- Steps shown as numbered list within table cell
-
-### Test Variables
-
-```yaml
-testVariables:
-  - category: "Category Name"
-    variables:
-      - name: "[VarName]"
-        actualValue: ""
-        notes: "Notes"
-```
-
-**Renders as:**
-- Category heading (h3)
-- Table per category (Variable | Actual Value | Notes)
-- Variable names shown in code font
-
-### Test Scenarios
-
-```yaml
-testScenarios:
-  - id: "TC-01"
-    title: "Scenario Title"
-    description: "Description"
-    testCases:
-      - testId: "TC-01.1"
-        title: "Test Case Title"
-        actionSteps: ["Step 1"]
-        expectedResult: ["Result 1"]
-```
-
-**Renders as:**
-- Scenario heading: "TC-01: Scenario Title"
-- Description paragraph
-- Large table with columns:
-  - Test ID (bold, colored)
-  - Title
-  - Prerequisite Reference
-  - Action Steps (numbered list)
-  - Expected Result (bulleted list)
-  - Notes
+- `category` groups suites in the UI
 
 ---
 
@@ -597,330 +471,400 @@ testScenarios:
 
 ### Pattern 1: Simple Feature Test
 
-```yaml
-metadata:
-  title: "Feature Name Test Suite"
-  feature: "Feature Name"
-  status: "Draft"
+```gherkin
+@feature-name
+Feature: Basic Feature
+  Tests basic functionality of the feature
 
-featureInformation:
-  feature: "Tests the Feature Name functionality"
-  details:
-    - "Basic happy path"
-    - "Error handling"
+  Scenario: Happy path
+    Given I am on the feature page
+    When I perform the main action
+    Then the feature works correctly
+    And no errors are displayed
 
-preSetup:
-  purpose: "Minimal setup required"
-  tenantSetup: []
-  userAccounts: []
-  checklistItems: []
-
-executionMatrix:
-  important: ""
-  matrix: []
-  instructions: []
-  executionFlow: []
-
-prerequisites: []
-testVariables: []
-
-testScenarios:
-  - id: "TC-01"
-    title: "Basic Functionality"
-    description: "Tests basic feature functionality"
-    testCases:
-      - testId: "TC-01.1"
-        title: "Happy Path"
-        prerequisiteReference: "None"
-        actionSteps:
-          - "Navigate to feature"
-          - "Perform action"
-        expectedResult:
-          - "Feature works correctly"
-        notes: ""
+  Scenario: Error handling
+    Given I am on the feature page
+    When I perform an invalid action
+    Then I see an appropriate error message
+    And the system remains stable
 ```
 
-### Pattern 2: Multi-User, Multi-Platform Test
+### Pattern 1b: Feature with Rules
 
-```yaml
-metadata:
-  title: "Multi-Platform Feature Test"
-  feature: "Feature Name"
-  status: "Draft"
+```gherkin
+@feature-name @complex
+Feature: Complex Feature with Multiple User Types
+  Tests a feature with different behaviors for different user types
 
-preSetup:
-  userAccounts:
-    - prerequisite: "PRE-01"
-      quantity: 1
-      notes: "Web user"
-    - prerequisite: "PRE-02"
-      quantity: 1
-      notes: "Mobile user"
+  Background:
+    Given the system is configured
+    And the database is accessible
 
-executionMatrix:
-  matrix:
-    - userType: "Web User"
-      platform: "Web Browser"
-      variableSet: "[WebVar1], [WebVar2]"
-      executionStatus: "Incomplete"
-    - userType: "Mobile User"
-      platform: "Mobile App"
-      variableSet: "[MobileVar1]"
-      executionStatus: "Incomplete"
+  Rule: Standard User Flows
+    Tests for standard user permissions and capabilities
 
-prerequisites:
-  - id: "PRE-01"
-    dataObject: "Web User Account"
-    steps:
-      - "Create web user"
-  - id: "PRE-02"
-    dataObject: "Mobile User Account"
-    steps:
-      - "Create mobile user"
+    Background:
+      Given I have a standard user account
+      And I am logged in as a standard user
 
-testVariables:
-  - category: "Web User Variables"
-    variables:
-      - name: "[WebVar1]"
-        actualValue: ""
-        notes: "Web variable"
-  - category: "Mobile User Variables"
-    variables:
-      - name: "[MobileVar1]"
-        actualValue: ""
-        notes: "Mobile variable"
+    Scenario: Standard user can access allowed features
+      When I navigate to the dashboard
+      Then I see standard user features
+      And I do not see admin features
+
+    Scenario: Standard user blocked from admin features
+      When I try to access admin settings
+      Then I see an access denied message
+
+  Rule: Admin User Flows
+    Tests for admin-specific functionality
+
+    Background:
+      Given I have an admin user account
+      And I am logged in as an admin
+
+    Scenario: Admin can access all features
+      When I navigate to the dashboard
+      Then I see admin features
+      And I see standard user features
+
+    Scenario: Admin can manage users
+      When I go to user management
+      Then I can create new users
+      And I can modify existing users
 ```
 
-### Pattern 3: Sequential Test Cases
+### Pattern 2: Multi-Step Workflow
 
-```yaml
-testScenarios:
-  - id: "TC-01"
-    title: "Sequential Flow"
-    description: "Tests a multi-step flow"
-    testCases:
-      - testId: "TC-01.1"
-        title: "Step 1: Initial Setup"
-        prerequisiteReference: "Uses PRE-01"
-        actionSteps:
-          - "Perform initial action"
-        expectedResult:
-          - "Initial state achieved"
-        notes: ""
-      - testId: "TC-01.2"
-        title: "Step 2: Main Action"
-        prerequisiteReference: "Continues from TC-01.1"
-        actionSteps:
-          - "Perform main action"
-        expectedResult:
-          - "Main action succeeds"
-        notes: ""
-      - testId: "TC-01.3"
-        title: "Step 3: Verification"
-        prerequisiteReference: "Continues from TC-01.2"
-        actionSteps:
-          - "Verify results"
-        expectedResult:
-          - "Results are correct"
-        notes: ""
+```gherkin
+@workflow @multi-step
+Feature: Complete Workflow
+  Tests an end-to-end user workflow
+
+  Background:
+    Given I have a valid user account
+    And I am logged into the application
+
+  Scenario: Complete workflow from start to finish
+    Given I am on the starting page
+    When I navigate to step 1
+    And I complete step 1 successfully
+    Then I proceed to step 2
+    When I complete step 2
+    Then I proceed to step 3
+    When I complete step 3
+    Then the workflow is complete
+    And I see a success confirmation
 ```
 
-### Pattern 4: Error Handling Tests
+### Pattern 3: Data-Driven Testing
 
-```yaml
-testScenarios:
-  - id: "TC-01"
-    title: "Error Handling"
-    description: "Tests various error conditions"
-    testCases:
-      - testId: "TC-01.1"
-        title: "Invalid Input"
-        prerequisiteReference: "Uses PRE-01"
-        actionSteps:
-          - "Enter invalid data"
-          - "Submit form"
-        expectedResult:
-          - "Error message displayed"
-          - "Form not submitted"
-        notes: ""
-      - testId: "TC-01.2"
-        title: "Missing Required Field"
-        prerequisiteReference: "Uses PRE-01"
-        actionSteps:
-          - "Leave required field empty"
-          - "Submit form"
-        expectedResult:
-          - "Validation error shown"
-          - "Field highlighted"
-        notes: ""
+```gherkin
+@data-driven @validation
+Feature: Input Validation
+  Tests various input scenarios
+
+  Scenario Outline: Validate different inputs
+    Given I am on the input form
+    When I enter "<input>" in the field
+    And I submit the form
+    Then I should see "<message>"
+    And the status should be "<status>"
+
+    Examples:
+      | input       | message        | status  |
+      | valid@email | Success        | success |
+      | invalid     | Invalid format | error   |
+      | empty       | Required field | error   |
+```
+
+### Pattern 4: Multi-Platform Testing
+
+```gherkin
+@multi-platform @authentication
+Feature: Cross-Platform Login
+  Verify login works on all platforms
+
+  Background:
+    Given I have a valid user account
+    And the account is active
+
+  @web
+  Scenario: Login on web browser
+    Given I am on the web login page
+    When I enter my credentials
+    And I click the login button
+    Then I am logged into the web application
+    And I see the web dashboard
+
+  @mobile
+  Scenario: Login on mobile app
+    Given I am on the mobile login screen
+    When I enter my credentials
+    And I tap the login button
+    Then I am logged into the mobile application
+    And I see the mobile home screen
+```
+
+### Pattern 5: Setup and Teardown
+
+```gherkin
+@setup-teardown @integration
+Feature: Feature with Complex Setup
+  Tests that require specific setup
+
+  # Setup Notes:
+  # 1. Create test tenant with ID [TenantId]
+  # 2. Create 2 test users: [User1] and [User2]
+  # 3. Configure feature flags: [FeatureFlag1]=enabled
+  # 4. Populate test data in database
+
+  Background:
+    Given tenant "[TenantId]" exists
+    And user "[User1]" is an admin
+    And user "[User2]" is a standard user
+    And feature "[FeatureFlag1]" is enabled
+
+  Scenario: Test with complex setup
+    Given I log in as "[User1]"
+    When I perform admin action
+    Then the action succeeds
+```
+
+### Pattern 6: Error Scenarios
+
+```gherkin
+@error-handling @negative-tests
+Feature: Error Handling
+  Verify system handles errors gracefully
+
+  Scenario: Missing required field
+    Given I am on the form page
+    When I leave the required field empty
+    And I submit the form
+    Then I see error "This field is required"
+    And the field is highlighted in red
+    And the form is not submitted
+
+  Scenario: Invalid data format
+    Given I am on the form page
+    When I enter invalid formatted data
+    And I submit the form
+    Then I see error "Invalid format"
+    And the form shows formatting hint
+
+  Scenario: Network error
+    Given I am on the page
+    When the network connection is lost
+    And I try to perform an action
+    Then I see error "Connection failed"
+    And the action can be retried
 ```
 
 ---
 
 ## Best Practices
 
-### YAML Writing
+### Writing Gherkin
 
-1. **Use spaces, not tabs** - YAML requires spaces for indentation
-2. **Consistent indentation** - Use 2 spaces per level
-3. **Quote strings with special characters** - Use quotes if string contains `:`, `[`, `]`, etc.
-4. **Keep arrays consistent** - All items should follow same structure
-5. **Use descriptive IDs** - Make IDs meaningful (TC-01 for first scenario)
+1. **Use business language** - Write for domain experts, not developers
+   - Good: `When I submit my order`
+   - Bad: `When I click the #submit-button element`
 
-### Content Writing
+2. **Be declarative, not imperative** - Describe what, not how
+   - Good: `When I log in as an admin`
+   - Bad: `When I enter "admin" and click login and wait for redirect`
 
-1. **Clear action steps** - Write steps as commands: "Click button" not "Button is clicked"
-2. **Specific expected results** - Be precise: "Error message 'Invalid input' appears" not "Error shown"
-3. **Logical flow** - Test cases should flow logically from one to next
-4. **Complete prerequisites** - Include all setup steps needed
-5. **Update dates** - Always update `lastUpdated` when modifying
+3. **One scenario, one behavior** - Keep scenarios focused
+   - Each scenario should test one specific thing
+   - If using "And" many times, consider breaking into multiple scenarios
+
+4. **Use Background wisely** - Only for truly common setup
+   - Background runs before EVERY scenario
+   - Don't overload it with unnecessary steps
+
+5. **Make steps reusable** - Write steps that can be used across scenarios
+   - Good: `Given I am logged in`
+   - Bad: `Given I navigate to /login and enter username and password`
+
+6. **Use Scenario Outline for data variations** - Don't repeat scenarios
+   - Use tables for testing same flow with different data
+   - Keeps tests DRY (Don't Repeat Yourself)
+
+### Tags
+
+1. **Use meaningful tags** - Tags should convey information
+   - `@critical`, `@smoke-test`, `@regression`
+   - `@web`, `@mobile`, `@api`
+   - `@authentication`, `@payments`, `@reporting`
+
+2. **Layer tags** - Use multiple tags for filtering
+   ```gherkin
+   @authentication @critical @smoke-test @web
+   Feature: User Login
+   ```
+
+3. **Tag at appropriate level** - Feature vs Scenario
+   - Feature tags apply to all scenarios
+   - Scenario tags apply to specific scenarios
 
 ### Organization
 
-1. **Group related scenarios** - Keep related test scenarios together
-2. **Consistent naming** - Use same naming patterns across suites
-3. **Logical test case ordering** - Order test cases in execution sequence
-4. **Complete metadata** - Fill in all metadata fields
-5. **Meaningful categories** - Use categories that make sense for your domain
+1. **Group related scenarios** - Keep related tests in one feature
+2. **Logical order** - Order scenarios from simple to complex
+3. **Clear feature descriptions** - Explain what and why
+4. **Document setup** - Use comments for complex requirements
 
 ### Maintenance
 
-1. **Update lastUpdated** - Always update when making changes
-2. **Version control** - Commit YAML files to git
-3. **Review before marking Approved** - Don't mark as Approved until reviewed
-4. **Keep manifest in sync** - Update manifest.json when adding suites
-5. **Document complex setups** - Add detailed notes for complex prerequisites
+1. **Keep features up to date** - Update when functionality changes
+2. **Remove obsolete scenarios** - Delete tests for removed features
+3. **Refactor duplicated steps** - Look for reusable patterns
+4. **Use version control** - Commit feature files to git
+
+---
+
+## Automation Path
+
+### Why Gherkin?
+
+Gherkin format makes your tests automation-ready:
+
+1. **Human-readable** - Anyone can understand
+2. **Machine-executable** - Can be automated with Cypress + Cucumber
+3. **Living documentation** - Tests document the system
+4. **BDD workflow** - Supports Behavior-Driven Development
+
+### Future Automation with Cypress
+
+When ready to automate:
+
+**1. Install Cypress + Cucumber**
+```bash
+npm install cypress @badeball/cypress-cucumber-preprocessor
+```
+
+**2. Configure Cypress**
+```javascript
+// cypress.config.js
+module.exports = {
+  e2e: {
+    specPattern: "**/*.feature",
+    supportFile: false,
+  },
+};
+```
+
+**3. Write Step Definitions**
+```javascript
+// cypress/support/step_definitions/login.js
+import { Given, When, Then } from "@badeball/cypress-cucumber-preprocessor";
+
+Given("I am on the login page", () => {
+  cy.visit("/login");
+});
+
+When("I enter username {string}", (username) => {
+  cy.get("#username").type(username);
+});
+
+Then("I should be redirected to the dashboard", () => {
+  cy.url().should("include", "/dashboard");
+});
+```
+
+**4. Run Tests**
+```bash
+npx cypress run
+```
+
+Your Gherkin files become executable tests!
 
 ---
 
 ## Quick Reference
 
-### Required Fields Checklist
+### File Checklist
 
-**metadata:**
-- [ ] title
-- [ ] feature
-- [ ] createdBy
-- [ ] dateCreated
-- [ ] lastUpdated
-- [ ] status
+- [ ] File in correct category folder
+- [ ] Named with kebab-case and `.feature` extension
+- [ ] Tags for categorization
+- [ ] Feature name and description
+- [ ] Background if needed
+- [ ] Clear scenarios with Given-When-Then
+- [ ] Setup notes as comments
+- [ ] Entry in `manifest.json`
 
-**featureInformation:**
-- [ ] feature
-- [ ] details (array)
+### Gherkin Syntax
 
-**preSetup:**
-- [ ] purpose
-- [ ] tenantSetup (array)
-- [ ] userAccounts (array)
-- [ ] checklistItems (array)
+```gherkin
+# Tags (optional, can have multiple)
+@tag1 @tag2
 
-**executionMatrix:**
-- [ ] important
-- [ ] matrix (array)
-- [ ] instructions (array)
-- [ ] executionFlow (array)
+# Feature (required)
+Feature: Feature Name
+  Multi-line description of the feature
+  can span multiple lines
 
-**testScenarios:**
-- [ ] id
-- [ ] title
-- [ ] description
-- [ ] testCases (array)
-  - [ ] testId
-  - [ ] title
-  - [ ] prerequisiteReference
-  - [ ] actionSteps (array)
-  - [ ] expectedResult (array)
-  - [ ] notes
+  # Background (optional, runs before each scenario)
+  Background:
+    Given common precondition
+    And another precondition
 
-### Common YAML Syntax
+  # Scenario (required, have multiple)
+  @scenario-tag
+  Scenario: Scenario name
+    Given initial context
+    And more context
+    When action performed
+    And another action
+    Then expected outcome
+    And verification
+    But not this
 
-```yaml
-# String
-key: "value"
+  # Scenario Outline (optional, for data-driven)
+  Scenario Outline: Template scenario
+    Given I have "<parameter>"
+    When I use "<parameter>"
+    Then I expect "<result>"
 
-# Number
-quantity: 2
+    Examples:
+      | parameter | result |
+      | value1    | result1 |
+      | value2    | result2 |
 
-# Boolean (use strings)
-status: "Draft"
-
-# Array
-items:
-  - "Item 1"
-  - "Item 2"
-
-# Nested object
-user:
-  name: "John"
-  role: "Admin"
-
-# Multi-line string (use |)
-description: |
-  This is a multi-line
-  description that preserves
-  line breaks.
+  # Comments for setup notes
+  # - Setup item 1
+  # - Setup item 2
 ```
 
-### ID Naming Patterns
-
-- **Prerequisites**: `PRE-01`, `PRE-02`, `PRE-03`
-- **Scenarios**: `TC-01`, `TC-02`, `TC-03`
-- **Test Cases**: `TC-01.1`, `TC-01.2`, `TC-02.1`
-- **Test Suite ID**: Matches filename (kebab-case)
-
 ---
 
-## Troubleshooting
+## Examples
 
-### Common Errors
-
-**"YAML parse error"**
-- Check indentation (must use spaces, not tabs)
-- Verify all colons have values
-- Check for unclosed quotes
-
-**"Test suite not appearing"**
-- Verify manifest.json entry exists
-- Check file path matches manifest entry
-- Ensure file is in correct category folder
-
-**"Prerequisite not found"**
-- Verify prerequisite ID exists in prerequisites array
-- Check spelling matches exactly
-- Ensure prerequisite is defined before being referenced
-
-**"Variable not found"**
-- Check variable name spelling
-- Verify variable is in correct category
-- Ensure brackets are included: `[VariableName]`
-
-### Validation Tips
-
-1. **Use a YAML validator** - Online tools can catch syntax errors
-2. **Test locally** - Use `npm run dev` to test before committing
-3. **Check console** - Browser console shows fetch errors
-4. **Verify paths** - Ensure file paths in manifest match actual files
-
----
-
-## Example: Complete Test Suite
-
-See `test-suite-ui/public/test-suites/authn/password-management.yaml` for a complete, real-world example that demonstrates all features and patterns.
+See these complete examples:
+- [`test-suite-ui/public/test-suites/authn/password-management.feature`](../test-suite-ui/public/test-suites/authn/password-management.feature)
+- [`test-suite-ui/public/test-suites/authn/otp-delivery-flow.feature`](../test-suite-ui/public/test-suites/authn/otp-delivery-flow.feature)
 
 ---
 
 ## Summary
 
-When creating or extending test suites:
+When creating test suites with Gherkin:
 
-1. **Choose appropriate category folder**
-2. **Use the template structure**
-3. **Follow naming conventions**
-4. **Update manifest.json**
-5. **Validate YAML syntax**
-6. **Test locally before committing**
-7. **Update lastUpdated date**
+1. **Use standard Gherkin syntax** - Feature, Background, Scenario, Given-When-Then
+2. **Write in business language** - Focus on behavior, not implementation
+3. **Organize with tags** - Use tags for categorization and filtering
+4. **Keep it simple** - One scenario, one behavior
+5. **Document setup** - Use comments for prerequisites
+6. **Update manifest.json** - Add entry for new test suite
+7. **Test locally** - Verify before committing
 
-This guide provides everything needed to work with the Test Suite Viewer YAML format. For questions or clarifications, refer to the example file or the YAML schema documentation.
+This format provides:
+- ✅ Human-readable documentation
+- ✅ Structured test cases
+- ✅ Clear acceptance criteria
+- ✅ Future automation path
+- ✅ Living documentation
 
+For questions or examples, refer to the existing feature files in the repository.

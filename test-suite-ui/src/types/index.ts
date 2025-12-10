@@ -1,3 +1,51 @@
+// Gherkin Test Suite Types
+export interface GherkinFeature {
+  id: string;
+  name: string;
+  description: string;
+  tags: string[];
+  language: string;
+  background?: GherkinBackground;
+  rules: GherkinRule[];
+  scenarios: GherkinScenario[];
+}
+
+export interface GherkinRule {
+  id: string;
+  name: string;
+  description: string;
+  tags: string[];
+  background?: GherkinBackground;
+  scenarios: GherkinScenario[];
+}
+
+export interface GherkinBackground {
+  name: string;
+  steps: GherkinStep[];
+}
+
+export interface GherkinScenario {
+  id: string;
+  name: string;
+  tags: string[];
+  steps: GherkinStep[];
+  examples?: GherkinExamples[];
+}
+
+export interface GherkinStep {
+  keyword: string; // Given, When, Then, And, But
+  text: string;
+  docString?: string;
+  dataTable?: string[][];
+}
+
+export interface GherkinExamples {
+  name: string;
+  tableHeader: string[];
+  tableRows: string[][];
+}
+
+// Test Suite List Item for homepage
 export interface TestSuiteListItem {
   id: string;
   title: string;
@@ -7,88 +55,7 @@ export interface TestSuiteListItem {
   category?: string;
 }
 
-export interface TestSuite {
-  id: string;
-  metadata: Metadata;
-  featureInformation: FeatureInformation;
-  preSetup: PreSetup;
-  executionMatrix: ExecutionMatrix;
-  prerequisites: Prerequisite[];
-  testVariables: TestVariableCategory[];
-  testScenarios: TestScenario[];
-}
-
-export interface Metadata {
-  title: string;
-  feature: string;
-  createdBy: string;
-  dateCreated: string;
-  lastUpdated: string;
-  status: string;
-}
-
-export interface FeatureInformation {
-  feature: string;
-  details: string[];
-}
-
-export interface PreSetup {
-  purpose: string;
-  tenantSetup: string[];
-  userAccounts: UserAccount[];
-  checklistItems: string[];
-}
-
-export interface UserAccount {
-  prerequisite: string;
-  quantity: number;
-  notes: string;
-}
-
-export interface ExecutionMatrix {
-  important: string;
-  matrix: MatrixRow[];
-  instructions: string[];
-  executionFlow: string[];
-}
-
-export interface MatrixRow {
-  userType: string;
-  platform: string;
-  variableSet: string;
-  executionStatus: string;
-}
-
-export interface Prerequisite {
-  id: string;
-  dataObject: string;
-  steps: string[];
-}
-
-export interface TestVariableCategory {
-  category: string;
-  variables: TestVariable[];
-}
-
-export interface TestVariable {
+export interface TestSuiteCategory {
   name: string;
-  actualValue: string;
-  notes: string;
+  suites: TestSuiteListItem[];
 }
-
-export interface TestScenario {
-  id: string;
-  title: string;
-  description: string;
-  testCases: TestCase[];
-}
-
-export interface TestCase {
-  testId: string;
-  title: string;
-  prerequisiteReference: string;
-  actionSteps: string[];
-  expectedResult: string[];
-  notes: string;
-}
-
