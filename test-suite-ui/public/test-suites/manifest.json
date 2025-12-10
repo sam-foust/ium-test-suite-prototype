@@ -4,6 +4,11 @@
       "id": "password-management",
       "file": "authn/password-management.yaml",
       "category": "Authentication"
+    },
+    {
+      "id": "otp-delivery-flow",
+      "file": "authn/otp-delivery-flow.yaml",
+      "category": "Authentication"
     }
   ]
 }

@@ -194,8 +194,9 @@ npm run preview
 
 ## 📖 Documentation
 
+- [`docs/AI_AGENT_GUIDE.md`](docs/AI_AGENT_GUIDE.md) - **Comprehensive guide for AI agents** - How to create and extend test suites
 - [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) - Deployment guide
-- [`docs/YAML_SCHEMA.md`](docs/YAML_SCHEMA.md) - Test suite format
+- [`docs/YAML_SCHEMA.md`](docs/YAML_SCHEMA.md) - Test suite format reference
 - [`docs/QUICK_START.md`](docs/QUICK_START.md) - Getting started
 
 ---
